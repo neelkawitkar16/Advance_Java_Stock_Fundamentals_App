@@ -1,6 +1,7 @@
 package org.eureka.stockAnalytics.controller;
 
 import org.eureka.stockAnalytics.service.MarketAnalyticsService;
+import org.eureka.stockAnalytics.vo.SectorVO;
 import org.eureka.stockAnalytics.vo.StockPriceHistoryRequest;
 import org.eureka.stockAnalytics.vo.StockPriceHistoryVO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,5 +42,16 @@ public class StocksController {
 
         return multipleStocksPriceHistory.stream()
                 .collect(Collectors.groupingBy(StockPriceHistoryVO::getTickerSymbol));
+    }
+
+    // Sector endpoints
+    @GetMapping(value = "/sectors/{sector-id}")
+    public SectorVO getSectorById(@PathVariable(value = "sector-id") int sectorId) {
+        return marketAnalyticsService.getSectorById(sectorId);
+    }
+
+    @GetMapping("/sectors")
+    public List<SectorVO> getAllSectors() {
+        return marketAnalyticsService.getAllSectors();
     }
 }
