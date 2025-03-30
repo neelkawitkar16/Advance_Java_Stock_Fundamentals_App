@@ -9,21 +9,28 @@ import java.util.stream.Collectors;
 @RestController
 public class HelloWorld {
 
-    @GetMapping(value = "/firstProgram/{input}")
-    public String firstProgram(@PathVariable(value = "input" ) String userInput) {
+    /*
+    @PathVariable - binds placeholder from the URI to the method parameter.
+        If URI and method parameter has the "same name" then no need for value [like in case of firstProgram() method]
+
+    @RequestMapping - specify on the method in the  controller, to map an HTTP request to the URL to this method.
+    */
+
+    @GetMapping(value = "/firstProgram/{userInput}")
+    public String firstProgram(@PathVariable String userInput) {
         return userInput + "Hello World!";
     }
 
     //A get mapping to concatenate a string to itself
-    @GetMapping(value = "/concatString/{input1}/{input2}")
-    public String concatString(@PathVariable(value = "input1") String str1,
+    @GetMapping(value = "/connectTwoStrings/{input1}/{input2}")
+    public String concatString(@PathVariable(value = "input1") String str1,  //here URI has names input1, input2 and the method parameters has str1 and str2 -> use value
                                @PathVariable(value = "input2") String str2) {
         return str1 + " " + str2;
     }
 
     @GetMapping(value = "/concatString/{input1}")
     public String concatStringWithRequestParam(@PathVariable(value = "input1") String str1,
-                               @RequestParam(value = "input2") String str2) {
+                               @RequestParam(value = "input2") String str2) {          // @RequestParam - bind HTTP parameters/Query params into  method arguments.
         return str1 + " " + str2;
     }
 
