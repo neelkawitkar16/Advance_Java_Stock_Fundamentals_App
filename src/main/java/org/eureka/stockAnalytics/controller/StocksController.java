@@ -82,6 +82,14 @@ public class StocksController {
         return marketAnalyticsService.getStockFundamentals(tickersList);
     }
 
+    @PostMapping(value = "/technologyFundamentals")
+    public List<StockFundamentalsVO> getStockFundamentalsBySector(@RequestBody List<String> tickersList) {
+        if (tickersList == null || tickersList.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tickers list cannot be empty");
+        }
+        return marketAnalyticsService.getStockFundamentalsBySector(tickersList);
+    }
+
     // Dealing with some standard exception, to send the same response code
     @ExceptionHandler({IllegalArgumentException.class, SQLException.class, NullPointerException.class})
     public ResponseEntity generateExceptionResponse(Exception e) {

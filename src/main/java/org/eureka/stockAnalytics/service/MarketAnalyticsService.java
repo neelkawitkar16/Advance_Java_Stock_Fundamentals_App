@@ -85,4 +85,8 @@ public class MarketAnalyticsService {
         return stockFundamentalsDAO.getStockFundamentals(tickersList);
     }
 
+    public List<StockFundamentalsVO> getStockFundamentalsBySector(List<String> tickersList) {
+        return stockFundamentalsDAO.getStockFundamentalsBySector(tickersList);
+    }
+
 }
