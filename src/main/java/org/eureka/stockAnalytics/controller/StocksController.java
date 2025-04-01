@@ -1,5 +1,7 @@
 package org.eureka.stockAnalytics.controller;
 
+import org.eureka.stockAnalytics.entity.stocks.SectorLookup;
+import org.eureka.stockAnalytics.entity.stocks.StocksFundamentals;
 import org.eureka.stockAnalytics.service.MarketAnalyticsService;
 import org.eureka.stockAnalytics.vo.SectorVO;
 import org.eureka.stockAnalytics.vo.StockFundamentalsVO;
@@ -82,6 +84,7 @@ public class StocksController {
         return marketAnalyticsService.getStockFundamentals(tickersList);
     }
 
+    //Sector = 37 (TECHNOLOGY)
     @PostMapping(value = "/technologyFundamentals")
     public List<StockFundamentalsVO> getStockFundamentalsBySector(@RequestBody List<String> tickersList) {
         if (tickersList == null || tickersList.isEmpty()) {
@@ -94,6 +97,16 @@ public class StocksController {
     @ExceptionHandler({IllegalArgumentException.class, SQLException.class, NullPointerException.class})
     public ResponseEntity generateExceptionResponse(Exception e) {
         return ResponseEntity.badRequest().body(e.getMessage());
+    }
+
+    @GetMapping(value = "/allStockFundamentals")
+    public List<StocksFundamentals> getAllStockFundamentals() {
+        return marketAnalyticsService.getAllStockFundamentals();
+    }
+
+    @GetMapping(value = "/sectorLookup")
+    public List<SectorLookup> getSectorLookup() {
+        return marketAnalyticsService.getSectorLookup();
     }
 
 }

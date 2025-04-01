@@ -3,6 +3,10 @@ package org.eureka.stockAnalytics.service;
 import org.eureka.stockAnalytics.dao.LookupDAO;
 import org.eureka.stockAnalytics.dao.StockFundamentalsDAO;
 import org.eureka.stockAnalytics.dao.StockPriceHistoryDAO;
+import org.eureka.stockAnalytics.entity.stocks.SectorLookup;
+import org.eureka.stockAnalytics.entity.stocks.StocksFundamentals;
+import org.eureka.stockAnalytics.repository.stocks.SectorLookupRepository;
+import org.eureka.stockAnalytics.repository.stocks.StocksFundamentalsRepository;
 import org.eureka.stockAnalytics.vo.SectorVO;
 import org.eureka.stockAnalytics.vo.StockFundamentalsVO;
 import org.eureka.stockAnalytics.vo.StockPriceHistoryVO;
@@ -21,15 +25,21 @@ public class MarketAnalyticsService {
     private StockPriceHistoryDAO stockPriceHistoryDAO;
     private LookupDAO lookupDAO;
     private StockFundamentalsDAO stockFundamentalsDAO;
+    private StocksFundamentalsRepository stocksFundamentalsRepository;
+    private SectorLookupRepository sectorLookupRepository;
     private static final Logger logger = LoggerFactory.getLogger(MarketAnalyticsService.class);
 
     @Autowired //create obj of DAO and calling the constructor
     public MarketAnalyticsService(StockPriceHistoryDAO stockPriceHistoryDAO,
                                   LookupDAO lookupDAO,
-                                  StockFundamentalsDAO stockFundamentalsDAO) {
+                                  StockFundamentalsDAO stockFundamentalsDAO,
+                                  StocksFundamentalsRepository stocksFundamentalsRepository,
+                                  SectorLookupRepository sectorLookupRepository) {
         this.stockPriceHistoryDAO = stockPriceHistoryDAO;
         this.lookupDAO = lookupDAO;
         this.stockFundamentalsDAO = stockFundamentalsDAO;
+        this.stocksFundamentalsRepository = stocksFundamentalsRepository;
+        this.sectorLookupRepository = sectorLookupRepository;
     }
 
     //Stock Price History related methods
@@ -89,4 +99,11 @@ public class MarketAnalyticsService {
         return stockFundamentalsDAO.getStockFundamentalsBySector(tickersList);
     }
 
+    public List<StocksFundamentals> getAllStockFundamentals() {
+        return stocksFundamentalsRepository.findAll();
+    }
+
+    public List<SectorLookup> getSectorLookup() {
+        return sectorLookupRepository.findAll();
+    }
 }
