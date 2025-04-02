@@ -2,6 +2,7 @@ package org.eureka.stockAnalytics.controller;
 
 import org.eureka.stockAnalytics.entity.stocks.SectorLookup;
 import org.eureka.stockAnalytics.entity.stocks.StocksFundamentals;
+import org.eureka.stockAnalytics.entity.stocks.SubSectorLookup;
 import org.eureka.stockAnalytics.service.MarketAnalyticsService;
 import org.eureka.stockAnalytics.vo.SectorVO;
 import org.eureka.stockAnalytics.vo.StockFundamentalsVO;
@@ -107,6 +108,16 @@ public class StocksController {
     @GetMapping(value = "/sectorLookup")
     public List<SectorLookup> getSectorLookup() {
         return marketAnalyticsService.getSectorLookup();
+    }
+
+    @GetMapping(value = "/subSectorLookup")
+    public List<SubSectorLookup> getSubSectorLookup() {
+        return marketAnalyticsService.getSubSectorLookup();
+    }
+
+    @PostMapping(value = "/selectedStockFundamentals")
+    public List<StocksFundamentals> getStockFundamentalsByTickers(@RequestBody List<String> tickers) {
+        return marketAnalyticsService.getStockFundamentalsByTickers(tickers);
     }
 
 }
