@@ -1,9 +1,6 @@
 package org.eureka.stockAnalytics.entity.stocks;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 import java.util.Objects;
@@ -22,6 +19,10 @@ public class StocksFundamentals {
     private BigDecimal marketCap;
     @Column(name = "current_ratio")
     private  BigDecimal currentRatio;
+
+    @OneToOne
+    @JoinColumn(name = "ticker_symbol", referencedColumnName = "ticker_symbol")
+    private CompanyLocations location;
 
 
     @Override

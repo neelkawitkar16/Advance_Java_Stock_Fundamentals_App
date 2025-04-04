@@ -1,5 +1,6 @@
 package org.eureka.stockAnalytics.controller;
 
+import org.eureka.stockAnalytics.dto.StateMarketCapDTO;
 import org.eureka.stockAnalytics.entity.stocks.SectorLookup;
 import org.eureka.stockAnalytics.entity.stocks.StocksFundamentals;
 import org.eureka.stockAnalytics.entity.stocks.SubSectorLookup;
@@ -115,9 +116,14 @@ public class StocksController {
         return marketAnalyticsService.getSubSectorLookup();
     }
 
-    @PostMapping(value = "/selectedStockFundamentals")
+    @GetMapping(value = "/selectedStockFundamentals")
     public List<StocksFundamentals> getStockFundamentalsByTickers(@RequestBody List<String> tickers) {
         return marketAnalyticsService.getStockFundamentalsByTickers(tickers);
+    }
+
+    @GetMapping("/marketCapByState")
+    public List<StateMarketCapDTO> getMarketCapByState() {
+        return marketAnalyticsService.getTotalMarketCapByState();
     }
 
 }

@@ -16,31 +16,20 @@ import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 
 import javax.sql.DataSource;
 
-//Both JDBC Templates are injected into Spring Application Context here
 @Configuration
-@EnableJpaRepositories(basePackages = {"org.eureka.stockAnalytics.repository.stocks"},
-        entityManagerFactoryRef = "entityManagerFactory", transactionManagerRef = "transactionManager")
-@EntityScan(basePackages = {"org.eureka.stockAnalytics.entity.stocks"})
-public class StocksDBConfig {
+@EnableJpaRepositories(basePackages = {"org.eureka.stockAnalytics.repository.crud"},
+entityManagerFactoryRef = "entityManagerFactoryCrud", transactionManagerRef = "transactionManagerCrud")
+@EntityScan(basePackages = {"org.eureka.stockAnalytics.entity.crud"})
+public class CrudDBConfig {
 
     @Autowired
-    DataSource dataSource;
+    DataSource crudDataSource;
 
-    @Bean(name = "jdbcTemplate")
-    public JdbcTemplate getJDBCTemplate() {
-        return new JdbcTemplate(dataSource);
-    }
-
-    @Bean(name = "namedParameterJdbcTemplate")
-    public NamedParameterJdbcTemplate getNamedParameterJdbcTemplate() {
-        return new NamedParameterJdbcTemplate(dataSource);
-    }
-
-    @Bean(value = "entityManagerFactory")
+    @Bean(value = "entityManagerFactoryCrud")
     public LocalContainerEntityManagerFactoryBean getEntityManagerFactory() {
         LocalContainerEntityManagerFactoryBean emf = new LocalContainerEntityManagerFactoryBean();
-        emf.setDataSource(dataSource);
-        emf.setPackagesToScan("org.eureka.stockAnalytics.entity.stocks");
+        emf.setDataSource(crudDataSource);
+        emf.setPackagesToScan("org.eureka.stockAnalytics.entity.crud");
 
         HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
         vendorAdapter.setShowSql(true);
@@ -49,8 +38,8 @@ public class StocksDBConfig {
         return emf;
     }
 
-    @Bean(value = "transactionManager")
-    public JpaTransactionManager getTransactionManger(@Qualifier(value = "entityManagerFactory") EntityManagerFactory entityManagerFactoryBean) {
+    @Bean(value = "transactionManagerCrud")
+    public JpaTransactionManager getTransactionManger(@Qualifier(value = "entityManagerFactoryCrud") EntityManagerFactory entityManagerFactoryBean) {
         JpaTransactionManager jpaTransactionManager = new JpaTransactionManager();
         jpaTransactionManager.setEntityManagerFactory(entityManagerFactoryBean);
 

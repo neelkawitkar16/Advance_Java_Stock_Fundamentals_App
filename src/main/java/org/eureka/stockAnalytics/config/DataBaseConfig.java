@@ -18,7 +18,6 @@ public class DataBaseConfig {
     Application properties
     Spring.datasource, all the four properties are as part of Stocks DB into the application contextdatasource
      */
-    @Primary
     @Bean(name = "dataSource")
     @ConfigurationProperties(prefix = "spring.datasource")
     public DataSource getDataSource() {

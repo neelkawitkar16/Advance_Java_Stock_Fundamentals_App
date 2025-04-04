@@ -3,6 +3,7 @@ package org.eureka.stockAnalytics.service;
 import org.eureka.stockAnalytics.dao.LookupDAO;
 import org.eureka.stockAnalytics.dao.StockFundamentalsDAO;
 import org.eureka.stockAnalytics.dao.StockPriceHistoryDAO;
+import org.eureka.stockAnalytics.dto.StateMarketCapDTO;
 import org.eureka.stockAnalytics.entity.stocks.SectorLookup;
 import org.eureka.stockAnalytics.entity.stocks.StocksFundamentals;
 import org.eureka.stockAnalytics.entity.stocks.SubSectorLookup;
@@ -119,4 +120,10 @@ public class MarketAnalyticsService {
     public List<StocksFundamentals> getStockFundamentalsByTickers(List<String> tickers) {
         return stocksFundamentalsRepository.findAllById(tickers);
     }
+
+    public List<StateMarketCapDTO> getTotalMarketCapByState() {
+        return stocksFundamentalsRepository.getTotalMarketCapByState();
+    }
+
+
 }
