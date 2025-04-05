@@ -1,10 +1,8 @@
 package org.eureka.stockAnalytics.entity.stocks;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
+import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -15,8 +13,24 @@ public class SubSectorLookup {
     private Integer subSectorID;
     @Column(name = "subsector_name")
     private String subSectorName;
-    @Column(name = "sector_id")
-    private Integer sectorID;
+   /* @Column(name = "sector_id")
+    private Integer sectorID;*/
+
+    // Many-to-One with SectorLookup
+    @ManyToOne
+    @JoinColumn(name = "sector_id")
+    private SectorLookup sectorID;
+
+    public SectorLookup getSectorID() {
+        return sectorID;
+    }
+
+    public void setSectorID(SectorLookup sectorID) {
+        this.sectorID = sectorID;
+    }
+/*    // One-to-Many with StocksFundamentals
+    @OneToMany(mappedBy = "subSectorLookup")
+    private List<StocksFundamentals> stocksFundamentalsList;*/
 
     public Integer getSubSectorID() {
         return subSectorID;
@@ -34,13 +48,13 @@ public class SubSectorLookup {
         this.subSectorName = subSectorName;
     }
 
-    public Integer getSectorID() {
+/*    public Integer getSectorID() {
         return sectorID;
     }
 
     public void setSectorID(Integer sectorID) {
         this.sectorID = sectorID;
-    }
+    }*/
 
     @Override
     public boolean equals(Object o) {

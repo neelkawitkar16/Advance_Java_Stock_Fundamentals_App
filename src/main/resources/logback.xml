@@ -19,7 +19,7 @@
         </encoder>
     </appender>
     <!-- Configure so that it outputs to both console and log file -->
-    <root level="DEBUG">
+    <root level="INFO">
         <appender-ref ref="stockAnalytics_Log" />
         <appender-ref ref="STDOUT" />
     </root>

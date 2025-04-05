@@ -5,13 +5,16 @@ import org.eureka.stockAnalytics.dao.StockFundamentalsDAO;
 import org.eureka.stockAnalytics.dao.StockPriceHistoryDAO;
 import org.eureka.stockAnalytics.dto.StateMarketCapDTO;
 import org.eureka.stockAnalytics.entity.stocks.SectorLookup;
+import org.eureka.stockAnalytics.entity.stocks.StockPriceHistory;
 import org.eureka.stockAnalytics.entity.stocks.StocksFundamentals;
 import org.eureka.stockAnalytics.entity.stocks.SubSectorLookup;
 import org.eureka.stockAnalytics.repository.stocks.SectorLookupRepository;
+import org.eureka.stockAnalytics.repository.stocks.StockPriceHistoryRepository;
 import org.eureka.stockAnalytics.repository.stocks.StocksFundamentalsRepository;
 import org.eureka.stockAnalytics.repository.stocks.SubSectorLookupRepository;
 import org.eureka.stockAnalytics.vo.SectorVO;
 import org.eureka.stockAnalytics.vo.StockFundamentalsVO;
+import org.eureka.stockAnalytics.vo.StockPriceHistoryKey;
 import org.eureka.stockAnalytics.vo.StockPriceHistoryVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +34,7 @@ public class MarketAnalyticsService {
     private StocksFundamentalsRepository stocksFundamentalsRepository;
     private SectorLookupRepository sectorLookupRepository;
     private SubSectorLookupRepository subSectorLookupRepository;
+    private StockPriceHistoryRepository stockPriceHistoryRepository;
     private static final Logger logger = LoggerFactory.getLogger(MarketAnalyticsService.class);
 
     @Autowired //create obj of DAO and calling the constructor
@@ -39,13 +43,15 @@ public class MarketAnalyticsService {
                                   StockFundamentalsDAO stockFundamentalsDAO,
                                   StocksFundamentalsRepository stocksFundamentalsRepository,
                                   SectorLookupRepository sectorLookupRepository,
-                                  SubSectorLookupRepository subSectorLookupRepository) {
+                                  SubSectorLookupRepository subSectorLookupRepository,
+                                  StockPriceHistoryRepository stockPriceHistoryRepository) {
         this.stockPriceHistoryDAO = stockPriceHistoryDAO;
         this.lookupDAO = lookupDAO;
         this.stockFundamentalsDAO = stockFundamentalsDAO;
         this.stocksFundamentalsRepository = stocksFundamentalsRepository;
         this.sectorLookupRepository = sectorLookupRepository;
         this.subSectorLookupRepository = subSectorLookupRepository;
+        this.stockPriceHistoryRepository = stockPriceHistoryRepository;
     }
 
     //Stock Price History related methods
@@ -125,5 +131,12 @@ public class MarketAnalyticsService {
         return stocksFundamentalsRepository.getTotalMarketCapByState();
     }
 
+    public Optional<StocksFundamentals> getSpecificStockFundamentals(String ticker) {
+        return stocksFundamentalsRepository.findById(ticker);
+    }
+
+    public Optional<StockPriceHistory> getSpecificStockPriceHistoryJPA(StockPriceHistoryKey stockPriceHistoryKey) {
+        return stockPriceHistoryRepository.findById(stockPriceHistoryKey);
+    }
 
 }

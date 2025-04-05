@@ -2,13 +2,11 @@ package org.eureka.stockAnalytics.controller;
 
 import org.eureka.stockAnalytics.dto.StateMarketCapDTO;
 import org.eureka.stockAnalytics.entity.stocks.SectorLookup;
+import org.eureka.stockAnalytics.entity.stocks.StockPriceHistory;
 import org.eureka.stockAnalytics.entity.stocks.StocksFundamentals;
 import org.eureka.stockAnalytics.entity.stocks.SubSectorLookup;
 import org.eureka.stockAnalytics.service.MarketAnalyticsService;
-import org.eureka.stockAnalytics.vo.SectorVO;
-import org.eureka.stockAnalytics.vo.StockFundamentalsVO;
-import org.eureka.stockAnalytics.vo.StockPriceHistoryRequest;
-import org.eureka.stockAnalytics.vo.StockPriceHistoryVO;
+import org.eureka.stockAnalytics.vo.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,12 +93,6 @@ public class StocksController {
         return marketAnalyticsService.getStockFundamentalsBySector(tickersList);
     }
 
-    // Dealing with some standard exception, to send the same response code
-    @ExceptionHandler({IllegalArgumentException.class, SQLException.class, NullPointerException.class})
-    public ResponseEntity generateExceptionResponse(Exception e) {
-        return ResponseEntity.badRequest().body(e.getMessage());
-    }
-
     @GetMapping(value = "/allStockFundamentals")
     public List<StocksFundamentals> getAllStockFundamentals() {
         return marketAnalyticsService.getAllStockFundamentals();
@@ -126,4 +118,38 @@ public class StocksController {
         return marketAnalyticsService.getTotalMarketCapByState();
     }
 
+    @GetMapping("/getSpecificStockFundamentals/{ticker}")
+    public StocksFundamentals getSpecificStockFundamentals(@PathVariable String ticker) {
+        Optional<StocksFundamentals> specificStockFundamentals = marketAnalyticsService.getSpecificStockFundamentals(ticker);
+        if(!specificStockFundamentals.isPresent()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No such ticker symbol exist in the stock fundamentals" + ticker);
+        } else {
+            return specificStockFundamentals.get();
+        }
+    }
+
+    @GetMapping(value = "/getSpecificStockPriceHistoryJPA/{tickerSymbol}")
+    public StockPriceHistory getSpecificStockPriceHistoryJPA(@PathVariable String tickerSymbol,
+                                                          @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate tradingDate){
+        StockPriceHistoryKey stockPriceHistoryKey = new StockPriceHistoryKey();
+        stockPriceHistoryKey.setTickerSymbol(tickerSymbol);
+        stockPriceHistoryKey.setTradingDate(tradingDate);
+        Optional<StockPriceHistory> specificStockPriceHistoryJPA = marketAnalyticsService.getSpecificStockPriceHistoryJPA(stockPriceHistoryKey);
+        if(!specificStockPriceHistoryJPA.isPresent()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid input");
+        } else {
+            return specificStockPriceHistoryJPA.get();
+        }
+    }
+
+  /*  @GetMapping(value = "/stockPriceHistory")
+    public List<StockPriceHistory> getStockPriceHistory(@RequestBody List<String> tickers) {
+        return marketAnalyticsService.getStockPriceHistory(tickers);
+    }*/
+
+    // Dealing with some standard exception, to send the same response code
+    @ExceptionHandler({IllegalArgumentException.class, SQLException.class, NullPointerException.class})
+    public ResponseEntity generateExceptionResponse(Exception e) {
+        return ResponseEntity.badRequest().body(e.getMessage());
+    }
 }

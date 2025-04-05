@@ -8,6 +8,7 @@ import java.util.Objects;
 @Entity
 @Table(name = "address", schema = "endeavour_test_area")
 public class Address {
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "address_id")
     @Id
     private String addressId;

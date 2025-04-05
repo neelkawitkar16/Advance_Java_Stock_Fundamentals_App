@@ -12,6 +12,7 @@ import java.util.Objects;
 public class Person {
     @Column(name = "person_id")
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // create id automatically
     private Integer personId;
     @Column(name = "first_name")
     private String firstName;
@@ -20,7 +21,7 @@ public class Person {
     @Column(name = "dob")
     private LocalDate dob;
 
-    @OneToMany(mappedBy = "person", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "person", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Address> addressList;
 
     public List<Address> getAddressList() {

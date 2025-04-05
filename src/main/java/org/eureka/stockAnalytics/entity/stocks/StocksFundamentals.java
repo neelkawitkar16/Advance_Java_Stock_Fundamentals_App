@@ -11,10 +11,13 @@ public class StocksFundamentals {
     @Column(name = "ticker_symbol")
     @Id
     private String tickerSymbol;
-    @Column(name = "sector_id")
+
+/*    @Column(name = "sector_id")
     private int sectorID;
+
     @Column(name = "subsector_id")
-    private int subSectorID;
+    private int subSectorID;*/
+
     @Column(name = "market_cap")
     private BigDecimal marketCap;
     @Column(name = "current_ratio")
@@ -24,13 +27,38 @@ public class StocksFundamentals {
     @JoinColumn(name = "ticker_symbol", referencedColumnName = "ticker_symbol")
     private CompanyLocations location;
 
+    // Many-to-One with SectorLookup
+    @ManyToOne
+    @JoinColumn(name = "sector_id")
+    private SectorLookup sectorLookup;
+
+    // Many-to-One with SubSectorLookup
+    @ManyToOne
+    @JoinColumn(name = "subsector_id")
+    private SubSectorLookup subSectorName;
+
+    public SectorLookup getSectorLookup() {
+        return sectorLookup;
+    }
+
+    public void setSectorLookup(SectorLookup sectorLookup) {
+        this.sectorLookup = sectorLookup;
+    }
+
+    public SubSectorLookup getSubSectorName() {
+        return subSectorName;
+    }
+
+    public void setSubSectorName(SubSectorLookup subSectorName) {
+        this.subSectorName = subSectorName;
+    }
 
     @Override
     public String toString() {
         return "StocksFundamentals{" +
                 "tickerSymbol='" + tickerSymbol + '\'' +
-                ", sectorID=" + sectorID +
-                ", subSectorID=" + subSectorID +
+//                ", sectorID=" + sectorID +
+//                ", subSectorID=" + subSectorID +
                 ", marketCap=" + marketCap +
                 ", currentRatio=" + currentRatio +
                 "}\n";
@@ -55,7 +83,7 @@ public class StocksFundamentals {
         this.tickerSymbol = tickerSymbol;
     }
 
-    public int getSectorID() {
+/*    public int getSectorID() {
         return sectorID;
     }
 
@@ -69,7 +97,7 @@ public class StocksFundamentals {
 
     public void setSubSectorID(int subSectorID) {
         this.subSectorID = subSectorID;
-    }
+    }*/
 
     public BigDecimal getMarketCap() {
         return marketCap;
