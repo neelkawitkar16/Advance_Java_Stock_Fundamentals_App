@@ -8,6 +8,8 @@ import org.eureka.stockAnalytics.entity.stocks.SectorLookup;
 import org.eureka.stockAnalytics.entity.stocks.StockPriceHistory;
 import org.eureka.stockAnalytics.entity.stocks.StocksFundamentals;
 import org.eureka.stockAnalytics.entity.stocks.SubSectorLookup;
+import org.eureka.stockAnalytics.exception.InvalidInputException;
+import org.eureka.stockAnalytics.exception.StockNotFoundException;
 import org.eureka.stockAnalytics.repository.stocks.SectorLookupRepository;
 import org.eureka.stockAnalytics.repository.stocks.StockPriceHistoryRepository;
 import org.eureka.stockAnalytics.repository.stocks.StocksFundamentalsRepository;
@@ -183,5 +185,18 @@ public class MarketAnalyticsService {
 
     public List<StocksFundamentals> getTopNStocksCriteriaAPI(Integer num) {
         return stockFundamentalsDAO.getTopNStocksCriteriaAPI(num);
+    }
+
+    public StockPriceHistory getHighestOpenPriceJPQL(String tickerSymbol) {
+
+        if (tickerSymbol == null || tickerSymbol.isBlank()) {
+            logger.error("Invalid ticker symbol provided");
+            throw new InvalidInputException("Ticker symbol cannot be empty");
+        }
+        return stockPriceHistoryRepository.findHighestOpenPriceByTickerSymbol(tickerSymbol)
+                .orElseThrow(() -> {
+                    logger.warn("Ticker symbol not found: {}", tickerSymbol);
+                    return new StockNotFoundException("Stock not found with ticker: " + tickerSymbol);
+                });
     }
 }

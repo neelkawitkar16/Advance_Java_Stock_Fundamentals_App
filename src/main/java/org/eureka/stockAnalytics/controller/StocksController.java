@@ -5,6 +5,7 @@ import org.eureka.stockAnalytics.entity.stocks.SectorLookup;
 import org.eureka.stockAnalytics.entity.stocks.StockPriceHistory;
 import org.eureka.stockAnalytics.entity.stocks.StocksFundamentals;
 import org.eureka.stockAnalytics.entity.stocks.SubSectorLookup;
+import org.eureka.stockAnalytics.exception.StockNotFoundException;
 import org.eureka.stockAnalytics.service.MarketAnalyticsService;
 import org.eureka.stockAnalytics.vo.*;
 import org.slf4j.Logger;
@@ -171,6 +172,18 @@ public class StocksController {
     @GetMapping(value = "/getTopNStocksCriteriaAPI/{num}")
     public List<StocksFundamentals> getTopNStocksCriteriaAPI(@PathVariable Integer num) {
         return marketAnalyticsService.getTopNStocksCriteriaAPI(num);
+    }
+
+    @GetMapping(value = "/getHighestOpenPriceJPQL/{tickerSymbol}")
+    public ResponseEntity<StockPriceHistory> getHighestOpenPriceJPQL(@PathVariable String tickerSymbol) {
+        logger.info("Fetching highest open price for: {}", tickerSymbol);
+
+        try {
+            return ResponseEntity.ok(marketAnalyticsService.getHighestOpenPriceJPQL(tickerSymbol));
+        } catch (StockNotFoundException e) {
+            logger.error("Stock not found: {}", tickerSymbol);
+            return ResponseEntity.notFound().build();
+        }
     }
 
   /*  @GetMapping(value = "/stockPriceHistory")
