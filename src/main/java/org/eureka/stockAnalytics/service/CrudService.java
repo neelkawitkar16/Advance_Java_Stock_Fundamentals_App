@@ -61,9 +61,8 @@ public class CrudService {
         if(personRepository.existsById(person.getPersonId())) {
             return insertPerson(person);
         } else {
-            return null;
+            throw new CrudException("No such person exist in CrudDB", person);
         }
     }
-
 
 }

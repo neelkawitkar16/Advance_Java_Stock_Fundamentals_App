@@ -2,16 +2,19 @@ package org.eureka.stockAnalytics.controller;
 
 import org.eureka.stockAnalytics.entity.crud.Address;
 import org.eureka.stockAnalytics.entity.stocks.StocksFundamentals;
+import org.eureka.stockAnalytics.exception.CrudException;
 import org.eureka.stockAnalytics.service.CrudService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import org.eureka.stockAnalytics.entity.crud.Person;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
@@ -59,5 +62,14 @@ public class CrudController {
     @PutMapping(value = "/updatePerson")
     public Person updatePerson(@RequestBody Person person) {
         return crudService.updatePerson(person);
+    }
+
+    @ExceptionHandler({CrudException.class})
+    public ResponseEntity getExceptionMessage(Exception e) {
+        /*return ResponseEntity.notFound()
+                .header("Record Not Found: " + e.getMessage())
+                .build();*/
+
+        return ResponseEntity.badRequest().body("Record Missing: " + e.getMessage());
     }
 }

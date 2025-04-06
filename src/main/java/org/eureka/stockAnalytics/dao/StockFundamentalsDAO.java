@@ -1,7 +1,14 @@
 package org.eureka.stockAnalytics.dao;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
+import org.eureka.stockAnalytics.entity.stocks.StocksFundamentals;
 import org.eureka.stockAnalytics.vo.StockFundamentalsVO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -13,6 +20,10 @@ public class StockFundamentalsDAO {
 
     @Autowired
     NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+
+    @Autowired
+    @Qualifier(value = "entityManagerFactory")
+    EntityManager entityManager;
 
     public List<StockFundamentalsVO> getStockFundamentals(List<String> tickersList) {
         String sqlQuery = """
@@ -99,4 +110,35 @@ public class StockFundamentalsDAO {
             return vo;
         });
     }
+
+    public List<StocksFundamentals> getTopNStocksByMarketCapJPQL(Integer num) {
+        String jpqlQuery = """
+                select
+                        sf
+                    from
+                        StocksFundamentals sf
+                    order by sf.marketCap desc
+                """;
+        TypedQuery<StocksFundamentals> query = entityManager.createQuery(jpqlQuery, StocksFundamentals.class);
+        query.setMaxResults(num); //limit to this num
+        return query.getResultList(); //no need for result which is usually needed
+    }
+
+    //Criteria BuilderAPI
+    public List<StocksFundamentals> getTopNStocksCriteriaAPI(Integer num) {
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<StocksFundamentals> query = criteriaBuilder.createQuery(StocksFundamentals.class);//create a query for this entity
+        Root<StocksFundamentals> root = query.from(StocksFundamentals.class);
+
+        query.select(root)
+                .where(criteriaBuilder.isNotNull(root.get("currentRatio")))
+                .orderBy(criteriaBuilder.desc(root.get("marketCap")));
+
+        List<StocksFundamentals> resultList = entityManager.createQuery(query)
+                .setMaxResults(num)
+                .getResultList();
+
+        return resultList;
+    }
+
 }

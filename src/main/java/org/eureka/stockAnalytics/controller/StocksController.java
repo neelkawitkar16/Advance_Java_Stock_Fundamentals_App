@@ -142,6 +142,37 @@ public class StocksController {
         }
     }
 
+    //Top stocks by each sector
+    @GetMapping(value = "/getTopStockBySectorJPASql")
+    public List<TopStockBySectorVO> getTopStockBySectorJPASql(){
+        return marketAnalyticsService.getTopStockBySectorJPASql();
+    }
+
+    @GetMapping(value = "/getTop3StocksBySectorJPASql")
+    public List<TopSectorVO> getTop3StocksBySectorJPASql(){
+        return marketAnalyticsService.getTop3StocksBySectorJPASql();
+    }
+
+    @GetMapping(value = "/getTopNStocksJPASql/{num}")
+    public List<StocksFundamentals> getTopNStocksJPASql(@PathVariable Integer num) {
+        return marketAnalyticsService.getTopNStocksJPASql(num);
+    }
+
+    @GetMapping(value = "/getStocksNonNullCRJPQL")
+    public List<StocksFundamentals> getStocksNonNullCRJPQL() {
+        return marketAnalyticsService.getStocksNonNullCRJPQL();
+    }
+
+    @GetMapping(value = "/getTopNStocksByMarketCapJPQL/{num}")
+    public List<StocksFundamentals> getTopNStocksByMarketCapJPQL(@PathVariable Integer num) {
+        return marketAnalyticsService.getTopNStocksByMarketCapJPQL(num);
+    }
+
+    @GetMapping(value = "/getTopNStocksCriteriaAPI/{num}")
+    public List<StocksFundamentals> getTopNStocksCriteriaAPI(@PathVariable Integer num) {
+        return marketAnalyticsService.getTopNStocksCriteriaAPI(num);
+    }
+
   /*  @GetMapping(value = "/stockPriceHistory")
     public List<StockPriceHistory> getStockPriceHistory(@RequestBody List<String> tickers) {
         return marketAnalyticsService.getStockPriceHistory(tickers);

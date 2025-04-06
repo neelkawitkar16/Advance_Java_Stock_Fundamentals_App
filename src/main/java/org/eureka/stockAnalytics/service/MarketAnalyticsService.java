@@ -12,19 +12,15 @@ import org.eureka.stockAnalytics.repository.stocks.SectorLookupRepository;
 import org.eureka.stockAnalytics.repository.stocks.StockPriceHistoryRepository;
 import org.eureka.stockAnalytics.repository.stocks.StocksFundamentalsRepository;
 import org.eureka.stockAnalytics.repository.stocks.SubSectorLookupRepository;
-import org.eureka.stockAnalytics.vo.SectorVO;
-import org.eureka.stockAnalytics.vo.StockFundamentalsVO;
-import org.eureka.stockAnalytics.vo.StockPriceHistoryKey;
-import org.eureka.stockAnalytics.vo.StockPriceHistoryVO;
+import org.eureka.stockAnalytics.vo.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class MarketAnalyticsService {
@@ -139,4 +135,53 @@ public class MarketAnalyticsService {
         return stockPriceHistoryRepository.findById(stockPriceHistoryKey);
     }
 
+    public List<TopStockBySectorVO> getTopStockBySectorJPASql() {
+        return stocksFundamentalsRepository.getTopStocksBySector();
+    }
+
+    public List<TopSectorVO> getTop3StocksBySectorJPASql() {
+        List<TopStockBySectorVO> top3StocksBySector = stocksFundamentalsRepository.getTop3StocksBySector();
+
+        List<TopSectorVO> finalOutputList = new ArrayList<>();
+
+        Map<Integer, List<TopStockBySectorVO>> sectorWiseMap = top3StocksBySector.stream()
+                .collect(Collectors.groupingBy(TopStockBySectorVO::getSectorID));
+        //sector 34  - List<TopStockBySectorVO> 3
+        sectorWiseMap.forEach((sectorID, topStockList) -> {
+            TopSectorVO sectorVO = new TopSectorVO();
+            //assigning sectorID
+            sectorVO.setSectorID(sectorID);
+            List<TopStockVO> topStockVOList = new ArrayList<>();
+            //34 Apple - sector id, name, ticker sy AAPL, name, market
+            topStockList.forEach(topStockBySectorVO -> {
+                //assigning sectorName
+                //Repetitive Step
+                sectorVO.setSectorName(topStockBySectorVO.getSectorName());
+                TopStockVO topStockVO = new TopStockVO();
+                topStockVO.setTickerSymbol(topStockBySectorVO.getTickerSymbol());
+                topStockVO.setTickerName(topStockBySectorVO.getTickerName());
+                topStockVO.setMarketCap(topStockBySectorVO.getMarketCap());
+                topStockVOList.add(topStockVO);
+            });
+            sectorVO.setTopStocks(topStockVOList);
+            finalOutputList.add(sectorVO);
+        });
+        return finalOutputList;
+    }
+
+    public List<StocksFundamentals> getTopNStocksJPASql(Integer num) {
+        return stocksFundamentalsRepository.getTopNStocks(num);
+    }
+
+    public List<StocksFundamentals> getStocksNonNullCRJPQL() {
+        return stocksFundamentalsRepository.getStocksNonNullCR();
+    }
+
+    public List<StocksFundamentals> getTopNStocksByMarketCapJPQL(Integer num) {
+        return stockFundamentalsDAO.getTopNStocksByMarketCapJPQL(num);
+    }
+
+    public List<StocksFundamentals> getTopNStocksCriteriaAPI(Integer num) {
+        return stockFundamentalsDAO.getTopNStocksCriteriaAPI(num);
+    }
 }
