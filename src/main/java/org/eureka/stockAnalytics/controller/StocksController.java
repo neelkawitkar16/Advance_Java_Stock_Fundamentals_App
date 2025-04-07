@@ -1,10 +1,12 @@
 package org.eureka.stockAnalytics.controller;
 
 import org.eureka.stockAnalytics.dto.StateMarketCapDTO;
+import org.eureka.stockAnalytics.dto.StockFundamentalsWithPriceHistoryDTO;
 import org.eureka.stockAnalytics.entity.stocks.SectorLookup;
 import org.eureka.stockAnalytics.entity.stocks.StockPriceHistory;
 import org.eureka.stockAnalytics.entity.stocks.StocksFundamentals;
 import org.eureka.stockAnalytics.entity.stocks.SubSectorLookup;
+import org.eureka.stockAnalytics.exception.InvalidInputException;
 import org.eureka.stockAnalytics.exception.StockNotFoundException;
 import org.eureka.stockAnalytics.service.MarketAnalyticsService;
 import org.eureka.stockAnalytics.vo.*;
@@ -14,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -183,6 +186,27 @@ public class StocksController {
         } catch (StockNotFoundException e) {
             logger.error("Stock not found: {}", tickerSymbol);
             return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/stock-fundamentals-price-history/{tickerSymbol}/{fromDate}/{toDate}")
+    public ResponseEntity<StockFundamentalsWithPriceHistoryDTO> getFundamentalsWithPriceHistory(
+            @PathVariable String tickerSymbol,
+            @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate fromDate,
+            @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate toDate) {
+
+        logger.info("Fetching fundamentals and price history for {} ({} to {})", tickerSymbol, fromDate, toDate);
+
+        try {
+            return ResponseEntity.ok(
+                    marketAnalyticsService.getFundamentalsWithPriceHistory(tickerSymbol, fromDate, toDate)
+            );
+        } catch (StockNotFoundException e) {
+            logger.error("Stock not found: {}", tickerSymbol);
+            return ResponseEntity.notFound().build();
+        } catch (InvalidInputException e) {
+            logger.error("Invalid input: {}", e.getMessage());
+            return ResponseEntity.badRequest().build();
         }
     }
 

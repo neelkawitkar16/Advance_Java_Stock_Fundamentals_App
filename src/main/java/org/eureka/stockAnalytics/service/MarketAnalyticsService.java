@@ -4,6 +4,7 @@ import org.eureka.stockAnalytics.dao.LookupDAO;
 import org.eureka.stockAnalytics.dao.StockFundamentalsDAO;
 import org.eureka.stockAnalytics.dao.StockPriceHistoryDAO;
 import org.eureka.stockAnalytics.dto.StateMarketCapDTO;
+import org.eureka.stockAnalytics.dto.StockFundamentalsWithPriceHistoryDTO;
 import org.eureka.stockAnalytics.entity.stocks.SectorLookup;
 import org.eureka.stockAnalytics.entity.stocks.StockPriceHistory;
 import org.eureka.stockAnalytics.entity.stocks.StocksFundamentals;
@@ -198,5 +199,31 @@ public class MarketAnalyticsService {
                     logger.warn("Ticker symbol not found: {}", tickerSymbol);
                     return new StockNotFoundException("Stock not found with ticker: " + tickerSymbol);
                 });
+    }
+
+    public StockFundamentalsWithPriceHistoryDTO getFundamentalsWithPriceHistory(
+            String tickerSymbol, LocalDate fromDate, LocalDate toDate) {
+
+        if (tickerSymbol == null || tickerSymbol.isBlank()) {
+            logger.error("Invalid ticker symbol provided");
+            throw new InvalidInputException("Ticker symbol cannot be empty");
+        }
+        if(fromDate.isAfter(toDate)) {
+            throw new InvalidInputException("From date cannot be after to date");
+        }
+
+        //Fetch data
+        StocksFundamentals stocksFundamentals = stocksFundamentalsRepository.findById(tickerSymbol)
+                .orElseThrow(() -> {
+                    logger.error("Stock not found: {}", tickerSymbol);
+                    return new StockNotFoundException("Stock not found with the ticker: " + tickerSymbol);
+                });
+
+        List<StockPriceHistoryVO> priceHistoryList = stockPriceHistoryDAO
+                .getSpecificStockPriceHistory(tickerSymbol, fromDate, toDate);
+
+        return new StockFundamentalsWithPriceHistoryDTO(stocksFundamentals.getMarketCap(),
+                stocksFundamentals.getCurrentRatio(),
+                priceHistoryList);
     }
 }
