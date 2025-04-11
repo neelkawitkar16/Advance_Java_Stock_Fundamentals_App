@@ -68,6 +68,46 @@ public class StockFundamentalsDAO {
         return stockFundamentalsList;
     }
 
+    public List<StockFundamentalsVO> getAllStockFundamentalsFeign() {
+        String sqlQuery = """
+                SELECT 
+                        sf.*,
+                        ssl.subsector_name,
+                        sl.sector_name,
+                        sl2.ticker_name
+                    FROM 
+                        endeavour.stock_fundamentals sf
+                    LEFT JOIN 
+                        endeavour.subsector_lookup ssl
+                     ON 
+                        sf.subsector_id=ssl.subsector_id
+                    LEFT JOIN 
+                        endeavour.sector_lookup sl
+                    ON 
+                        sf.sector_id=sl.sector_id
+                    LEFT JOIN 
+                        endeavour.stocks_lookup sl2
+                    ON 
+                        sf.ticker_symbol=sl2.ticker_symbol
+                """;
+
+        MapSqlParameterSource mapSqlParameterSource = new MapSqlParameterSource();
+
+        List<StockFundamentalsVO> stockFundamentalsList = namedParameterJdbcTemplate.query(sqlQuery, mapSqlParameterSource, (rs, rowNum) -> {
+            StockFundamentalsVO stockFundamentalsVO = new StockFundamentalsVO();
+            stockFundamentalsVO.setTickerName(rs.getString("ticker_name"));
+            stockFundamentalsVO.setTickerSymbol(rs.getString("ticker_symbol"));
+            stockFundamentalsVO.setSectorID(rs.getInt("sector_id"));
+            stockFundamentalsVO.setSectorName(rs.getString("sector_name"));
+            stockFundamentalsVO.setSubSectorID(rs.getInt("subsector_id"));
+            stockFundamentalsVO.setSubSectorName(rs.getString("subsector_name"));
+            stockFundamentalsVO.setMarketCap(rs.getBigDecimal("market_cap"));
+            stockFundamentalsVO.setCurrentRatio(rs.getBigDecimal("current_ratio"));
+            return stockFundamentalsVO;
+        });
+        return stockFundamentalsList;
+    }
+
     public List<StockFundamentalsVO> getStockFundamentalsBySector(List<String> tickersList) {
         final int TECHNOLOGY_SECTOR_ID = 37;
         String sqlQuery = """

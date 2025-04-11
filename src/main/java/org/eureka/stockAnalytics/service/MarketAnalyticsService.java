@@ -11,6 +11,7 @@ import org.eureka.stockAnalytics.entity.stocks.StocksFundamentals;
 import org.eureka.stockAnalytics.entity.stocks.SubSectorLookup;
 import org.eureka.stockAnalytics.exception.InvalidInputException;
 import org.eureka.stockAnalytics.exception.StockNotFoundException;
+import org.eureka.stockAnalytics.remote.StockCalculationClient;
 import org.eureka.stockAnalytics.repository.stocks.SectorLookupRepository;
 import org.eureka.stockAnalytics.repository.stocks.StockPriceHistoryRepository;
 import org.eureka.stockAnalytics.repository.stocks.StocksFundamentalsRepository;
@@ -21,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -34,6 +36,7 @@ public class MarketAnalyticsService {
     private SectorLookupRepository sectorLookupRepository;
     private SubSectorLookupRepository subSectorLookupRepository;
     private StockPriceHistoryRepository stockPriceHistoryRepository;
+    private StockCalculationClient stockCalculationClient;
     private static final Logger logger = LoggerFactory.getLogger(MarketAnalyticsService.class);
 
     @Autowired //create obj of DAO and calling the constructor
@@ -43,7 +46,8 @@ public class MarketAnalyticsService {
                                   StocksFundamentalsRepository stocksFundamentalsRepository,
                                   SectorLookupRepository sectorLookupRepository,
                                   SubSectorLookupRepository subSectorLookupRepository,
-                                  StockPriceHistoryRepository stockPriceHistoryRepository) {
+                                  StockPriceHistoryRepository stockPriceHistoryRepository,
+                                  StockCalculationClient stockCalculationClient) {
         this.stockPriceHistoryDAO = stockPriceHistoryDAO;
         this.lookupDAO = lookupDAO;
         this.stockFundamentalsDAO = stockFundamentalsDAO;
@@ -51,6 +55,7 @@ public class MarketAnalyticsService {
         this.sectorLookupRepository = sectorLookupRepository;
         this.subSectorLookupRepository = subSectorLookupRepository;
         this.stockPriceHistoryRepository = stockPriceHistoryRepository;
+        this.stockCalculationClient = stockCalculationClient;
     }
 
     //Stock Price History related methods
@@ -105,6 +110,11 @@ public class MarketAnalyticsService {
     public List<StockFundamentalsVO> getStockFundamentals(List<String> tickersList) {
         return stockFundamentalsDAO.getStockFundamentals(tickersList);
     }
+
+    public List<StockFundamentalsVO> getALLStockFundamentalsVO() {
+        return stockFundamentalsDAO.getAllStockFundamentalsFeign();
+    }
+
 
     public List<StockFundamentalsVO> getStockFundamentalsBySector(List<String> tickersList) {
         return stockFundamentalsDAO.getStockFundamentalsBySector(tickersList);
@@ -226,4 +236,33 @@ public class MarketAnalyticsService {
                 stocksFundamentals.getCurrentRatio(),
                 priceHistoryList);
     }
+
+    public List<StockFundamentalsVO> getCumulativeReturnFeign(LocalDate fromDate, LocalDate toDate, BigDecimal marketCap) {
+        List<StockFundamentalsVO> allStockFundamentals = getALLStockFundamentalsVO();
+        CRSRequestVO crsRequestVO = new CRSRequestVO();
+
+        List<StockFundamentalsVO> outputList = allStockFundamentals.stream()
+                .filter(stockFundamentals -> stockFundamentals.getMarketCap() != null)
+                .filter(stockFundamentals -> stockFundamentals.getMarketCap().compareTo(marketCap) > 0)
+                .collect(Collectors.toList());
+
+        List<String> tickersList = outputList.stream()
+                .map(StockFundamentalsVO::getTickerSymbol)
+                .collect(Collectors.toList());
+
+        crsRequestVO.setTickers(tickersList);
+
+        List<CRSResponseVO> cumulativeReturn = stockCalculationClient.getCumulativeReturn(fromDate, toDate, crsRequestVO);
+
+        Map<String, BigDecimal> cumulativeReturnMap = cumulativeReturn.stream()
+                .collect(Collectors.toMap(CRSResponseVO::getTicker,
+                        CRSResponseVO::getCumulativeReturn));
+
+        outputList.forEach(stockFundamentals -> {
+            stockFundamentals.setCumulativeReturn(cumulativeReturnMap.get(stockFundamentals.getTickerSymbol()));
+        });
+
+        return outputList;
+    }
+
 }

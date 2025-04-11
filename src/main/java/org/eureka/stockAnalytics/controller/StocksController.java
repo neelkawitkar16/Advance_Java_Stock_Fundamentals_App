@@ -20,6 +20,7 @@ import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
@@ -208,6 +209,13 @@ public class StocksController {
             logger.error("Invalid input: {}", e.getMessage());
             return ResponseEntity.badRequest().build();
         }
+    }
+
+    @PostMapping(value = "/getCumulativeReturnFeign")
+    public List<StockFundamentalsVO> getCumulativeReturnFeign(@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate fromDate,
+                                                             @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate toDate,
+                                                             @RequestParam BigDecimal marketCap) {
+        return marketAnalyticsService.getCumulativeReturnFeign(fromDate, toDate, marketCap);
     }
 
   /*  @GetMapping(value = "/stockPriceHistory")
