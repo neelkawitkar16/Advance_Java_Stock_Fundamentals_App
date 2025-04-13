@@ -1,16 +1,27 @@
 package org.eureka.stockAnalytics.vo;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.math.BigDecimal;
 import java.util.Objects;
 
+@Schema(name = "Stocks Fundamentals with Names", description = "Stock Fundamentals with Cumulative Return")
 public class StockFundamentalsVO {
+    @Schema(name = "Stocks Ticker", description = "Indicates each stocks ticker symbol", example = "AAPL")
     private String tickerSymbol;
+    @Schema(name = "Stocks Ticker Name", description = "Indicates each stocks ticker name", example = "Apple Inc.")
     private String tickerName;
+    @Schema(name = "Stocks Sector ID", description = "Indicates each stocks sector ID", example = "37")
     private Integer sectorID;
+    @Schema(name = "Stocks Sector Name", description = "Indicates each stocks sector name", example = "Technology")
     private String sectorName;
+    @Schema(name = "Stocks Sub-Sector ID", description = "Indicates each stocks sub-sector ID", example = "273")
     private Integer subSectorID;
+    @Schema(name = "Stocks Sub-Sector Name", description = "Indicates each stocks sub-sector name", example = "Electronics & Computer Distribution")
     private String subSectorName;
+    @Schema(name = "Stocks MarketCap", description = "Indicates each stocks market cap", example = "2829863354368")
     private BigDecimal marketCap;
+    @Schema(name = "Stocks MarketCap", description = "Indicates each stocks market cap", example = "2829863354368")
     private BigDecimal currentRatio;
     private BigDecimal cumulativeReturn;
 

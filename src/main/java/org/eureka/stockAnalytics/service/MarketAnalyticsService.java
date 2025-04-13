@@ -265,4 +265,63 @@ public class MarketAnalyticsService {
         return outputList;
     }
 
+    public List<SubsectorTopStocksVO> getTopStocksBySubsector(LocalDate fromDate, LocalDate toDate, BigDecimal minMarketCap) {
+        // 1. Get all stocks with their fundamentals
+        List<StockFundamentalsVO> allStocks = getALLStockFundamentalsVO();
+
+        // 2. Filter by market cap if provided
+        if (minMarketCap != null) {
+            allStocks = allStocks.stream()
+                    .filter(stock -> stock.getMarketCap() != null &&
+                            stock.getMarketCap().compareTo(minMarketCap) >= 0)
+                    .collect(Collectors.toList());
+        }
+
+        // 3. Prepare request for cumulative returns
+        CRSRequestVO crsRequest = new CRSRequestVO();
+        crsRequest.setTickers(allStocks.stream()
+                .map(StockFundamentalsVO::getTickerSymbol)
+                .collect(Collectors.toList()));
+
+        // 4. Get cumulative returns
+        List<CRSResponseVO> cumulativeReturns = stockCalculationClient
+                .getCumulativeReturn(fromDate, toDate, crsRequest);
+
+        // 5. Create a map of ticker to cumulative return
+        Map<String, BigDecimal> returnMap = cumulativeReturns.stream()
+                .collect(Collectors.toMap(
+                        CRSResponseVO::getTicker,
+                        CRSResponseVO::getCumulativeReturn));
+
+        // 6. Group by subsector and get top 5 stocks per subsector
+        Map<String, List<StockFundamentalsVO>> stocksBySubsector = allStocks.stream()
+                .filter(stock -> stock.getSubSectorID() != null && stock.getSectorID() != null)
+                .collect(Collectors.groupingBy(StockFundamentalsVO::getSubSectorName));
+
+        // 7. Process each subsector
+        List<SubsectorTopStocksVO> result = new ArrayList<>();
+
+        stocksBySubsector.forEach((subsector, stocks) -> {
+            // Get sector name (assuming all stocks in subsector have same sector)
+            String sector = stocks.get(0).getSectorName();
+
+            // Sort by cumulative return descending and take top 5
+            List<TopStockWithReturnVO> topStocks = stocks.stream()
+                    .filter(stock -> returnMap.containsKey(stock.getTickerSymbol()))
+                    .sorted((s1, s2) -> returnMap.get(s2.getTickerSymbol())
+                            .compareTo(returnMap.get(s1.getTickerSymbol())))
+                    .limit(5)
+                    .map(stock -> new TopStockWithReturnVO(
+                            stock.getTickerSymbol(),
+                            stock.getTickerName(),
+                            stock.getMarketCap(),
+                            returnMap.get(stock.getTickerSymbol())))
+                    .collect(Collectors.toList());
+
+            if (!topStocks.isEmpty()) {
+                result.add(new SubsectorTopStocksVO(sector, subsector, topStocks));
+            }
+        });
+        return result;
+    }
 }

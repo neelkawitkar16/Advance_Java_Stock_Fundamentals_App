@@ -1,5 +1,8 @@
 package org.eureka.stockAnalytics.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.eureka.stockAnalytics.dto.StateMarketCapDTO;
 import org.eureka.stockAnalytics.dto.StockFundamentalsWithPriceHistoryDTO;
 import org.eureka.stockAnalytics.entity.stocks.SectorLookup;
@@ -28,8 +31,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+// http://localhost:65000/stockanalytics/swagger-ui/index.html#/
 @RestController
 @RequestMapping(value = "/stocks")
+@Tag(name= "Stocks Database Controller", description = "Stocks Controller Service has multiple end points to fetch data from StocksDB. It provides stock fundamentals of US stocks")
 public class StocksController {
 
     @Autowired
@@ -212,10 +217,22 @@ public class StocksController {
     }
 
     @PostMapping(value = "/getCumulativeReturnFeign")
+    @Operation(method = "Cumulative Returns", tags = {"ABC", "Test"}, description = "The service would return Stocks Fundamentals and Cumulative returns for stocks for particular duration.")
+    @ApiResponse(responseCode = "400", description = "Returns HTTP Error Code 400 when the Request Params are invalid")
+    @ApiResponse(responseCode = "200", description = "Returns HTTP Code 200 when the Request Params are valid")
+    @ApiResponse(responseCode = "500", description = "Opps! The server or the Database is down")
     public List<StockFundamentalsVO> getCumulativeReturnFeign(@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate fromDate,
                                                              @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate toDate,
                                                              @RequestParam BigDecimal marketCap) {
         return marketAnalyticsService.getCumulativeReturnFeign(fromDate, toDate, marketCap);
+    }
+
+    @GetMapping("/top-by-subsector")
+    public List<SubsectorTopStocksVO> getTopStocksBySubsector(
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate fromDate,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate toDate,
+            @RequestParam(required = false) BigDecimal minMarketCap) {
+        return marketAnalyticsService.getTopStocksBySubsector(fromDate, toDate, minMarketCap);
     }
 
   /*  @GetMapping(value = "/stockPriceHistory")
