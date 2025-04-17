@@ -26,6 +26,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class MarketAnalyticsService {
@@ -237,14 +238,24 @@ public class MarketAnalyticsService {
                 priceHistoryList);
     }
 
-    public List<StockFundamentalsVO> getCumulativeReturnFeign(LocalDate fromDate, LocalDate toDate, BigDecimal marketCap) {
+    public List<StockFundamentalsVO> getCumulativeReturnFeign(Integer num, LocalDate fromDate, LocalDate toDate, BigDecimal marketCap) {
         List<StockFundamentalsVO> allStockFundamentals = getALLStockFundamentalsVO();
         CRSRequestVO crsRequestVO = new CRSRequestVO();
 
+        if(allStockFundamentals == null || allStockFundamentals.isEmpty()){
+            throw new StockNotFoundException("The Database is down");
+        }
+
+        //Junit for HappyPath scenario
         List<StockFundamentalsVO> outputList = allStockFundamentals.stream()
                 .filter(stockFundamentals -> stockFundamentals.getMarketCap() != null)
                 .filter(stockFundamentals -> stockFundamentals.getMarketCap().compareTo(marketCap) > 0)
                 .collect(Collectors.toList());
+
+        // Junit to test DB is down scenario
+        if (outputList.isEmpty()) {
+            throw new StockNotFoundException("Stocks Database is Down");
+        }
 
         List<String> tickersList = outputList.stream()
                 .map(StockFundamentalsVO::getTickerSymbol)
@@ -254,6 +265,11 @@ public class MarketAnalyticsService {
 
         List<CRSResponseVO> cumulativeReturn = stockCalculationClient.getCumulativeReturn(fromDate, toDate, crsRequestVO);
 
+        // Junit to test webservice is down scenario
+        if(cumulativeReturn.isEmpty()) {
+            throw new StockNotFoundException("Stock calculation Webservice is down");
+        }
+
         Map<String, BigDecimal> cumulativeReturnMap = cumulativeReturn.stream()
                 .collect(Collectors.toMap(CRSResponseVO::getTicker,
                         CRSResponseVO::getCumulativeReturn));
@@ -262,7 +278,14 @@ public class MarketAnalyticsService {
             stockFundamentals.setCumulativeReturn(cumulativeReturnMap.get(stockFundamentals.getTickerSymbol()));
         });
 
-        return outputList;
+        // Junit to test Top N Stocks
+        List<StockFundamentalsVO> sortedOutputList = outputList.stream()
+                .filter(stock -> stock.getCumulativeReturn() != null)
+                .sorted(Comparator.comparing(StockFundamentalsVO::getCumulativeReturn).reversed())
+                .limit(num)
+                .collect(Collectors.toList());
+
+        return sortedOutputList;
     }
 
     public List<SubsectorTopStocksVO> getTopStocksBySubsector(LocalDate fromDate, LocalDate toDate, BigDecimal minMarketCap) {

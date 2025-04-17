@@ -216,15 +216,16 @@ public class StocksController {
         }
     }
 
-    @PostMapping(value = "/getCumulativeReturnFeign")
+    @PostMapping(value = "/getTopNCumulativeReturnFeign")
     @Operation(method = "Cumulative Returns", tags = {"ABC", "Test"}, description = "The service would return Stocks Fundamentals and Cumulative returns for stocks for particular duration.")
     @ApiResponse(responseCode = "400", description = "Returns HTTP Error Code 400 when the Request Params are invalid")
     @ApiResponse(responseCode = "200", description = "Returns HTTP Code 200 when the Request Params are valid")
     @ApiResponse(responseCode = "500", description = "Opps! The server or the Database is down")
-    public List<StockFundamentalsVO> getCumulativeReturnFeign(@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate fromDate,
+    public List<StockFundamentalsVO> getTopNCumulativeReturnFeign(@RequestParam Integer num,
+                                                                  @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate fromDate,
                                                              @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate toDate,
                                                              @RequestParam BigDecimal marketCap) {
-        return marketAnalyticsService.getCumulativeReturnFeign(fromDate, toDate, marketCap);
+        return marketAnalyticsService.getCumulativeReturnFeign(num, fromDate, toDate, marketCap);
     }
 
     @GetMapping("/top-by-subsector")
